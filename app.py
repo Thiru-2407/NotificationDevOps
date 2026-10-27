@@ -1,25 +1,25 @@
+
 from flask import Flask, render_template, request
-import sqlite3
 import os
+import psycopg
 
 app = Flask(__name__)
 
-DB_PATH = os.environ.get("DB_PATH", "notifications.db")
-
 
 def get_db():
-    connection = sqlite3.connect(DB_PATH)
-    connection.row_factory = sqlite3.Row
-    return connection
+    return psycopg.connect(
+        host=os.environ.get("DB_HOST", "localhost"),
+        dbname=os.environ.get("DB_NAME", "notifications"),
+        user=os.environ.get("DB_USER", "notification_user"),
+        password=os.environ.get("DB_PASSWORD", "devops-demo-password-2026"),
+    )
 
 
 def init_db():
-    os.makedirs(os.path.dirname(os.path.abspath(DB_PATH)), exist_ok=True)
-
     with get_db() as connection:
         connection.execute("""
             CREATE TABLE IF NOT EXISTS notifications (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
                 message TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -45,7 +45,7 @@ def add_notification():
 
     with get_db() as connection:
         connection.execute(
-            "INSERT INTO notifications (title, message) VALUES (?, ?)",
+            "INSERT INTO notifications (title, message) VALUES (%s, %s)",
             (title, message)
         )
 
