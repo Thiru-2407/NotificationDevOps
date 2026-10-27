@@ -1,26 +1,27 @@
 
 from flask import Flask, render_template, redirect, url_for
-import sqlite3
 import os
+import psycopg
+from psycopg.rows import dict_row
 
 app = Flask(__name__)
 
-DB_PATH = os.environ.get("DB_PATH", "notifications.db")
-
 
 def get_db():
-    connection = sqlite3.connect(DB_PATH)
-    connection.row_factory = sqlite3.Row
-    return connection
+    return psycopg.connect(
+        host=os.environ.get("DB_HOST", "localhost"),
+        dbname=os.environ.get("DB_NAME", "notifications"),
+        user=os.environ.get("DB_USER", "notification_user"),
+        password=os.environ.get("DB_PASSWORD", "devops-demo-password-2026"),
+        row_factory=dict_row,
+    )
 
 
 def init_db():
-    os.makedirs(os.path.dirname(os.path.abspath(DB_PATH)), exist_ok=True)
-
     with get_db() as connection:
         connection.execute("""
             CREATE TABLE IF NOT EXISTS notifications (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
                 message TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -47,7 +48,7 @@ def index():
 def delete_notification(notification_id):
     with get_db() as connection:
         connection.execute(
-            "DELETE FROM notifications WHERE id = ?",
+            "DELETE FROM notifications WHERE id = %s",
             (notification_id,)
         )
 
