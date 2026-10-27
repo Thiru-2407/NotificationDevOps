@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 import sqlite3
 import os
 
@@ -38,7 +38,29 @@ def index():
 
     return render_template(
         "index.html",
-        notifications=notifications
+        notifications=notifications,
+        success=None
+    )
+
+
+@app.route("/delete/<int:notification_id>", methods=["POST"])
+def delete_notification(notification_id):
+    with get_db() as connection:
+        connection.execute(
+            "DELETE FROM notifications WHERE id = ?",
+            (notification_id,)
+        )
+
+    with get_db() as connection:
+        notifications = connection.execute(
+            "SELECT id, title, message, created_at "
+            "FROM notifications ORDER BY id DESC"
+        ).fetchall()
+
+    return render_template(
+        "index.html",
+        notifications=notifications,
+        success="Alert deleted successfully!"
     )
 
 

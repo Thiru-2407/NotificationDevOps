@@ -1,15 +1,16 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Notifications | v2</title>
+    <title>Delete Notifications | v3</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <main class="container">
-        <h1>View Notifications</h1>
-        <p class="subtitle">Notification Management System — Version 2</p>
+        <h1>Delete Notifications</h1>
+        <p class="subtitle">Notification Management System — Version 3</p>
 
         <section class="panel">
             <h2>Existing alerts</h2>
@@ -19,15 +20,23 @@
                     <article class="notification">
                         <h3>{{ notification.title }}</h3>
                         <p>{{ notification.message }}</p>
-                        <small>Created: {{ notification.created_at }}</small>
+
+                        <form action="/delete/{{ notification.id }}" method="POST"
+                              onsubmit="return confirm('Delete this alert?');">
+                            <button type="submit">Delete Alert</button>
+                        </form>
                     </article>
                 {% endfor %}
             {% else %}
-                <p>No notifications available.</p>
+                <p>No notifications available to delete.</p>
+            {% endif %}
+
+            {% if success %}
+                <p class="success">{{ success }}</p>
             {% endif %}
         </section>
 
-        <footer>v2 · View Notifications</footer>
+        <footer>v3 · Delete Notifications</footer>
     </main>
 </body>
 </html>
