@@ -1,11 +1,30 @@
-from flask import Flask, render_template, request, redirect, url_for
-from datetime import datetime
+from flask import Flask, render_template, request
+import sqlite3
+import os
 
 app = Flask(__name__)
 
-# Temporary storage for v1; shared persistent storage will be added
-# when we configure the complete three-version system.
-notifications = []
+DB_PATH = os.environ.get("DB_PATH", "notifications.db")
+
+
+def get_db():
+    connection = sqlite3.connect(DB_PATH)
+    connection.row_factory = sqlite3.Row
+    return connection
+
+
+def init_db():
+    os.makedirs(os.path.dirname(os.path.abspath(DB_PATH)), exist_ok=True)
+
+    with get_db() as connection:
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS notifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                message TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
 
 
 @app.route("/")
@@ -24,12 +43,11 @@ def add_notification():
             success="Please enter both a title and a message."
         ), 400
 
-    notifications.append({
-        "id": len(notifications) + 1,
-        "title": title,
-        "message": message,
-        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    })
+    with get_db() as connection:
+        connection.execute(
+            "INSERT INTO notifications (title, message) VALUES (?, ?)",
+            (title, message)
+        )
 
     return render_template(
         "index.html",
@@ -38,4 +56,5 @@ def add_notification():
 
 
 if __name__ == "__main__":
+    init_db()
     app.run(host="0.0.0.0", port=5000, debug=False)
