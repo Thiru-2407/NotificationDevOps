@@ -3,34 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Notification | v1</title>
+    <title>View Notifications | v2</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <main class="container">
-        <h1>Add Notification</h1>
-        <p class="subtitle">Notification Management System — Version 1</p>
+        <h1>View Notifications</h1>
+        <p class="subtitle">Notification Management System — Version 2</p>
 
         <section class="panel">
-            <h2>Create a new alert</h2>
-            <form action="/add" method="POST">
-                <label for="title">Alert title</label>
-                <input id="title" name="title" maxlength="100"
-                       placeholder="Enter alert title" required>
+            <h2>Existing alerts</h2>
 
-                <label for="message">Alert message</label>
-                <textarea id="message" name="message" maxlength="500"
-                          placeholder="Enter alert message" required></textarea>
-
-                <button type="submit">Add Alert</button>
-            </form>
-
-            {% if success %}
-                <p class="success">{{ success }}</p>
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <article class="notification">
+                        <h3>{{ notification.title }}</h3>
+                        <p>{{ notification.message }}</p>
+                        <small>Created: {{ notification.created_at }}</small>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <p>No notifications available.</p>
             {% endif %}
         </section>
 
-        <footer>v1 · Add Notification</footer>
+        <footer>v2 · View Notifications</footer>
     </main>
 </body>
 </html>
