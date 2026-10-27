@@ -3,40 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notification Manager | v1</title>
+    <title>Add Notification | v1</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <main class="container">
-        <h1>Notification Manager</h1>
-        <p class="subtitle">Version 1 — Basic Alert Management</p>
+        <h1>Add Notification</h1>
+        <p class="subtitle">Notification Management System — Version 1</p>
 
         <section class="panel">
-            <h2>Add Notification</h2>
-            <form action="{{ url_for('add_notification') }}" method="POST">
-                <input name="title" placeholder="Alert title" maxlength="100" required>
-                <textarea name="message" placeholder="Alert message" maxlength="500" required></textarea>
+            <h2>Create a new alert</h2>
+            <form action="/add" method="POST">
+                <label for="title">Alert title</label>
+                <input id="title" name="title" maxlength="100"
+                       placeholder="Enter alert title" required>
+
+                <label for="message">Alert message</label>
+                <textarea id="message" name="message" maxlength="500"
+                          placeholder="Enter alert message" required></textarea>
+
                 <button type="submit">Add Alert</button>
             </form>
+
+            {% if success %}
+                <p class="success">{{ success }}</p>
+            {% endif %}
         </section>
 
-        <section class="panel">
-            <h2>Notifications ({{ notifications|length }})</h2>
-
-            {% for item in notifications %}
-            <article class="alert">
-                <h3>{{ item.title }}</h3>
-                <p>{{ item.message }}</p>
-                <small>{{ item.created_at }} | ID: {{ item.id }}</small>
-                <form action="{{ url_for('delete_notification', notification_id=item.id) }}" method="POST">
-                    <button class="delete" type="submit">Delete</button>
-                </form>
-            </article>
-            {% else %}
-            <p class="empty">No notifications yet. Add your first alert!</p>
-            {% endfor %}
-        </section>
-        <footer>Notification Management System · v1</footer>
+        <footer>v1 · Add Notification</footer>
     </main>
 </body>
 </html>

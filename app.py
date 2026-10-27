@@ -3,41 +3,38 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+# Temporary storage for v1; shared persistent storage will be added
+# when we configure the complete three-version system.
 notifications = []
-next_id = 1
 
 
 @app.route("/")
 def index():
-    return render_template("index.html", notifications=notifications)
+    return render_template("index.html", success=None)
 
 
 @app.route("/add", methods=["POST"])
 def add_notification():
-    global next_id
-
     title = request.form.get("title", "").strip()
     message = request.form.get("message", "").strip()
 
-    if title and message:
-        notifications.append({
-            "id": next_id,
-            "title": title,
-            "message": message,
-            "created_at": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-        })
-        next_id += 1
+    if not title or not message:
+        return render_template(
+            "index.html",
+            success="Please enter both a title and a message."
+        ), 400
 
-    return redirect(url_for("index"))
+    notifications.append({
+        "id": len(notifications) + 1,
+        "title": title,
+        "message": message,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    })
 
-
-@app.route("/delete/<int:notification_id>", methods=["POST"])
-def delete_notification(notification_id):
-    notifications[:] = [
-        item for item in notifications
-        if item["id"] != notification_id
-    ]
-    return redirect(url_for("index"))
+    return render_template(
+        "index.html",
+        success="Alert submitted successfully!"
+    )
 
 
 if __name__ == "__main__":
